@@ -295,8 +295,11 @@ class VirtualMachine extends EventEmitter {
      * @return {!Promise} Promise that resolves after targets are installed.
      */
     loadProject (input) {
+        log.debug('Scratch-VM 加载项目', input);
+        // 第一步：判断输入是否为对象、ArrayBuffer、DataViews
         if (typeof input === 'object' && !(input instanceof ArrayBuffer) &&
           !ArrayBuffer.isView(input)) {
+            log.debug('加载项目不是 object、ArrayBuffer、DataViews');
             // If the input is an object and not any ArrayBuffer
             // or an ArrayBuffer view (this includes all typed arrays and DataViews)
             // turn the object into a JSON string, because we suspect
@@ -306,11 +309,14 @@ class VirtualMachine extends EventEmitter {
             input = JSON.stringify(input);
         }
 
+        // 第二步：判断输入是否为 sb 文件，是 -> 返回 [json, zip] 数组
         const validationPromise = new Promise((resolve, reject) => {
+            log.debug('加载项目验证');
             const validate = require('scratch-parser');
             // The second argument of false below indicates to the validator that the
             // input should be parsed/validated as an entire project (and not a single sprite)
             validate(input, false, (error, res) => {
+                log.debug('Scratch-Parser 验证结果', JSON.stringify(res));
                 if (error) return reject(error);
                 resolve(res);
             });
@@ -338,6 +344,7 @@ class VirtualMachine extends EventEmitter {
                 return Promise.reject(error);
             });
 
+        // 第三步：通过验证后将输入 “反序列化”（deserializeProject）后再发出“项目已加载”指令给 vm.runtime
         return validationPromise
             .then(validatedInput => this.deserializeProject(validatedInput[0], validatedInput[1]))
             .then(() => this.runtime.emitProjectLoaded())
@@ -466,26 +473,32 @@ class VirtualMachine extends EventEmitter {
     }
 
     /**
+     * 从 json 文件加载项目
      * Load a project from a Scratch JSON representation.
      * @param {string} projectJSON JSON string representing a project.
      * @param {?JSZip} zip Optional zipped project containing assets to be loaded.
      * @returns {Promise} Promise that resolves after the project has loaded
      */
     deserializeProject (projectJSON, zip) {
+        log.debug('反序列化加载项目', JSON.stringify(projectJSON), zip);
         // Clear the current runtime
         this.clear();
 
         const runtime = this.runtime;
         const deserializePromise = function () {
+            // 从 project.json 中获取版本
             const projectVersion = projectJSON.projectVersion;
             if (projectVersion === 2) {
+                log.debug('解析 sb2 项目');
                 const sb2 = require('./serialization/sb2');
                 return sb2.deserialize(projectJSON, runtime, false, zip);
             }
             if (projectVersion === 3) {
+                log.debug('解析 sb3 项目');
                 const sb3 = require('./serialization/sb3');
                 return sb3.deserialize(projectJSON, runtime, zip);
             }
+            log.debug('未知类型项目，无法解析');
             return Promise.reject('Unable to verify Scratch Project version.');
         };
         return deserializePromise()
@@ -502,7 +515,7 @@ class VirtualMachine extends EventEmitter {
      */
     installTargets (targets, extensions, wholeProject) {
         const extensionPromises = [];
-
+        debugger;
         extensions.extensionIDs.forEach(extensionID => {
             if (!this.extensionManager.isExtensionLoaded(extensionID)) {
                 const extensionURL = extensions.extensionURLs.get(extensionID) || extensionID;
@@ -510,7 +523,7 @@ class VirtualMachine extends EventEmitter {
             }
         });
 
-        targets = targets.filter(target => !!target);
+        targets = targets.filter(target => !!target); // 对象去空
 
         return Promise.all(extensionPromises).then(() => {
             targets.forEach(target => {

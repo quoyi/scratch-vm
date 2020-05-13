@@ -67,6 +67,7 @@
     "jsdoc": "^3.5.5",
     "json": "^9.0.4",
     "lodash.defaultsdeep": "4.6.1",
+    "log4js": "^6.2.0",
     "pngjs": "^3.3.2",
     "scratch-audio": "latest",
     "scratch-blocks": "latest",

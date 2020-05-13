@@ -15,6 +15,7 @@ const builtinExtensions = {
     // These are the non-core built-in extensions.
     pen: () => require('../extensions/scratch3_pen'),
     wedo2: () => require('../extensions/scratch3_wedo2'),
+    magicblocks: () => require('../extensions/scratch3_magic'),
     music: () => require('../extensions/scratch3_music'),
     microbit: () => require('../extensions/scratch3_microbit'),
     text2speech: () => require('../extensions/scratch3_text2speech'),
@@ -154,6 +155,8 @@ class ExtensionManager {
             this._loadedExtensions.set(extensionURL, serviceName);
             return Promise.resolve();
         }
+
+        log.warn('内置 extensions 未找到对应扩展', extensionURL);
 
         return new Promise((resolve, reject) => {
             // If we `require` this at the global level it breaks non-webpack targets, including tests

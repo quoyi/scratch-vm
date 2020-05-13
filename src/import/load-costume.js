@@ -101,6 +101,7 @@ const fetchBitmapCanvas_ = function (costume, runtime, rotationCenter) {
         return Promise.reject('No V2 Bitmap adapter present.');
     }
 
+    // 获取 costume 图片和文本
     return Promise.all([costume.asset, costume.textLayerAsset].map(asset => {
         if (!asset) {
             return null;

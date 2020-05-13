@@ -861,10 +861,13 @@ const parseScratchAssets = function (object, runtime, zip) {
             rotationCenterX: costumeSource.rotationCenterX,
             rotationCenterY: costumeSource.rotationCenterY
         };
+        // 获取 costume 文件类型（未定义时默认为 png)
         const dataFormat =
             costumeSource.dataFormat ||
             (costumeSource.assetType && costumeSource.assetType.runtimeFormat) || // older format
             'png'; // if all else fails, guess that it might be a PNG
+
+        // 获取 costume MD5 文件名（未定义时默认为 assetId + custome 文件类型）
         const costumeMd5Ext = costumeSource.hasOwnProperty('md5ext') ?
             costumeSource.md5ext : `${costumeSource.assetId}.${dataFormat}`;
         costume.md5 = costumeMd5Ext;
@@ -1081,6 +1084,7 @@ const parseScratchObject = function (object, runtime, extensions, zip, assets) {
 };
 
 const deserializeMonitor = function (monitorData, runtime, targets, extensions) {
+    log.debug('调用监控器反序列化方法');
     // If the serialized monitor has spriteName defined, look up the sprite
     // by name in the given list of targets and update the monitor's targetId
     // to match the sprite's id.

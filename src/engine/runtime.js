@@ -2503,6 +2503,18 @@ class Runtime extends EventEmitter {
     }
 
     /**
+     * 隐藏关联的所有块
+     * @param {!RenderTarget} renderTarget An instance RenderTarget
+     */
+    hideBlocks (renderTarget) {
+        // TODO: 隐藏当前积木块关联的所有积木
+        // const target = new Blocks();
+        // target.setVisible(false);
+        renderTarget.setVisible(false);
+        this.redrawRequested = true;
+    }
+
+    /**
      * Tell the runtime to request a redraw.
      * Use after a clone/sprite has completed some visible operation on the stage.
      */
